@@ -1,15 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Clipboard,
+  Alert,
+} from 'react-native';
+import { PasswordStrength } from '../types';
 
 interface PasswordCardProps {
+  id: string;
   service: string;
   email: string;
+  password: string;
   has2FA: boolean;
-  strength: 'strong' | 'medium' | 'weak';
+  strength: PasswordStrength;
+  onDelete?: (id: string) => void;
 }
 
-export default function PasswordCard({ service, email, has2FA, strength }: PasswordCardProps) {
-  const getStrengthColor = () => {
+export default function PasswordCard({
+  id,
+  service,
+  email,
+  password,
+  has2FA,
+  strength,
+  onDelete,
+}: PasswordCardProps) {
+  const [revealed, setRevealed] = useState(false);
+
+  const getStrengthColor = (): string => {
     switch (strength) {
       case 'strong': return '#10b981';
       case 'medium': return '#f59e0b';
@@ -17,7 +38,7 @@ export default function PasswordCard({ service, email, has2FA, strength }: Passw
     }
   };
 
-  const getStrengthLabel = () => {
+  const getStrengthLabel = (): string => {
     switch (strength) {
       case 'strong': return 'Strong';
       case 'medium': return 'Medium';
@@ -25,19 +46,49 @@ export default function PasswordCard({ service, email, has2FA, strength }: Passw
     }
   };
 
-  const getServiceIcon = (serviceName: string) => {
+  const getServiceIcon = (name: string): string => {
     const icons: Record<string, string> = {
       Google: '🔍',
       GitHub: '🐙',
       Twitter: '🐦',
       Netflix: '🎬',
       Amazon: '📦',
+      Facebook: '📘',
+      Apple: '🍎',
+      Discord: '🎮',
     };
-    return icons[serviceName] || '🔐';
+    return icons[name] || '🔐';
   };
 
+  const handleCopy = () => {
+    if (!password) {
+      Alert.alert('No password stored', 'Add a password first.');
+      return;
+    }
+    Clipboard.setString(password);
+    Alert.alert('Copied', 'Password copied to clipboard.');
+  };
+
+  const handleView = () => {
+    if (!password) {
+      Alert.alert('No password stored', 'This entry has no password saved.');
+      return;
+    }
+    setRevealed(v => !v);
+  };
+
+  const handleLongPress = () => {
+    if (!onDelete) return;
+    Alert.alert('Delete Entry', `Remove "${service}" from vault?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => onDelete(id) },
+    ]);
+  };
+
+  const maskedPassword = password ? '••••••••••••' : '(no password saved)';
+
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onLongPress={handleLongPress} delayLongPress={600}>
       <View style={styles.header}>
         <View style={styles.serviceInfo}>
           <Text style={styles.icon}>{getServiceIcon(service)}</Text>
@@ -46,10 +97,18 @@ export default function PasswordCard({ service, email, has2FA, strength }: Passw
             <Text style={styles.email}>{email}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.copyButton}>
+        <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
           <Text style={styles.copyText}>Copy</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Password row */}
+      <View style={styles.passwordRow}>
+        <Text style={styles.passwordDisplay}>
+          {revealed ? password : maskedPassword}
+        </Text>
+      </View>
+
       <View style={styles.footer}>
         <View style={styles.badgeContainer}>
           {has2FA && (
@@ -64,11 +123,11 @@ export default function PasswordCard({ service, email, has2FA, strength }: Passw
             </Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.viewButton}>
-          <Text style={styles.viewButtonText}>View</Text>
+        <TouchableOpacity style={styles.viewButton} onPress={handleView}>
+          <Text style={styles.viewButtonText}>{revealed ? 'Hide' : 'View'}</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -83,7 +142,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   serviceInfo: {
     flexDirection: 'row',
@@ -113,6 +172,19 @@ const styles = StyleSheet.create({
     color: '#d1d5db',
     fontSize: 14,
     fontWeight: '600',
+  },
+  passwordRow: {
+    backgroundColor: '#111827',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 10,
+  },
+  passwordDisplay: {
+    color: '#9ca3af',
+    fontSize: 13,
+    fontFamily: 'monospace',
+    letterSpacing: 1,
   },
   footer: {
     flexDirection: 'row',

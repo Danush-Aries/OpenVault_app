@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import HomeScreen from './screens/HomeScreen';
 import VaultScreen from './screens/VaultScreen';
 import IdentityScreen from './screens/IdentityScreen';
@@ -27,42 +28,45 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused }) => (
-            <TabIcon name={route.name} focused={focused} />
-          ),
-          tabBarActiveTintColor: '#6366f1',
-          tabBarInactiveTintColor: '#9ca3af',
-          tabBarStyle: styles.tabBar,
-          tabBarLabelStyle: styles.tabLabel,
-          headerStyle: styles.header,
-          headerTitleStyle: styles.headerTitle,
-        })}
-      >
-        <Tab.Screen 
-          name="Home" 
-          component={HomeScreen}
-          options={{ title: 'Dashboard' }}
-        />
-        <Tab.Screen 
-          name="Vault" 
-          component={VaultScreen}
-          options={{ title: 'Password Vault' }}
-        />
-        <Tab.Screen 
-          name="Identity" 
-          component={IdentityScreen}
-          options={{ title: 'Identities' }}
-        />
-        <Tab.Screen 
-          name="Threats" 
-          component={ThreatScreen}
-          options={{ title: 'Threat Monitor' }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <>
+      <StatusBar style="light" />
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused }) => (
+              <TabIcon name={route.name} focused={focused} />
+            ),
+            tabBarActiveTintColor: '#6366f1',
+            tabBarInactiveTintColor: '#9ca3af',
+            tabBarStyle: styles.tabBar,
+            tabBarLabelStyle: styles.tabLabel,
+            headerStyle: styles.header,
+            headerTitleStyle: styles.headerTitle,
+          })}
+        >
+          <Tab.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ title: 'Dashboard' }}
+          />
+          <Tab.Screen
+            name="Vault"
+            component={VaultScreen}
+            options={{ title: 'Password Vault' }}
+          />
+          <Tab.Screen
+            name="Identity"
+            component={IdentityScreen}
+            options={{ title: 'Identities' }}
+          />
+          <Tab.Screen
+            name="Threats"
+            component={ThreatScreen}
+            options={{ title: 'Threat Monitor' }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </>
   );
 }
 
